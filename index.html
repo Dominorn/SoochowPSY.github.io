@@ -1,10 +1,266 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>心理測驗網站</title>
-  </head>
-  <body>
-    <h1>哈囉！這是我的心理測驗網站首頁！</h1>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>測驗問卷</title>
+  <style>
+    body {
+      font-family: Arial;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    img {
+      width: 600px;
+      height: 600px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin: 10px auto;
+      background-color: #FFFFFF;
+      display: block;
+    }
+
+    form { margin-top: 20px; }
+
+    .scale-option {
+      margin: 10px;
+      font-size: 20px;
+    }
+
+    .scale-option input[type="radio"] {
+      transform: scale(1.5);
+      margin-right: 8px;
+    }
+
+    .question-block { margin-bottom: 30px; }
+
+    button {
+      font-size: 20px;
+      padding: 10px 30px;
+      border-radius: 10px;
+      background-color: #D0D0D0;
+      color: black;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 開始按鈕 -->
+  <button id="startButton" style="
+    font-size: 24px;
+    padding: 15px 40px;
+    border-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  ">開始問卷</button>
+
+  <!-- 二選一題目 -->
+  <div id="choiceQuestion" style="display: none; margin: 20px;">
+    <h2>請選擇一個選項：</h2>
+    <button onclick="selectChoice('生理男')" style="
+      font-size: 20px; padding: 10px 30px; margin: 10px; border-radius: 10px;
+      background-color: #2196F3; color: white; border: none; cursor: pointer;">
+      生理男
+    </button>
+    <button onclick="selectChoice('生理女')" style="
+      font-size: 20px; padding: 10px 30px; margin: 10px; border-radius: 10px;
+      background-color: #f44336; color: white; border: none; cursor: pointer;">
+      生理女
+    </button>
+  </div>
+
+  <!-- 問卷區 -->
+  <img id="surveyImage" src="" alt="問卷圖片" style="display: none;">
+
+  <form id="surveyForm" style="display: none;">
+    <div id="questionContainer"></div>
+    <button type="submit">下一題</button>
+  </form>
+
+  <!-- 灰色遮罩 -->
+  <div id="grayOverlay" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, 1);
+    z-index: 9999;
+    display: none;
+  "></div>
+
+  <script>
+   const questions = [
+  '我對於此水果較有購買慾望',
+  '我會購買此水果',
+  '我會優先向朋友推薦購買此水果',
+  '我願意用較高的價格購買此水果'
+];
+
+const images = [
+  'file:///D:/images/pic1.jpg',
+  'file:///D:/images/pic2.jpg',
+  'file:///D:/images/pic3.jpg',
+  'file:///D:/images/pic4.jpg',
+  'file:///D:/images/pic5.jpg',
+  'file:///D:/images/pic6.jpg',
+  'file:///D:/images/pic7.jpg',
+  'file:///D:/images/pic8.jpg',
+  'file:///D:/images/pic9.jpg',
+  'file:///D:/images/pic10.jpg',
+  'file:///D:/images/pic11.jpg',
+  'file:///D:/images/pic12.jpg',
+  'file:///D:/images/pic13.jpeg',
+  'file:///D:/images/pic14.jpg',
+  'file:///D:/images/pic15.jpg',
+  'file:///D:/images/pic16.jpg',
+  'file:///D:/images/pic17.jpg',
+  'file:///D:/images/pic18.jpg'
+];
+
+// 洗牌函數（Fisher-Yates Shuffle）
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+shuffle(images);  // 啟動時先洗牌
+
+let currentIndex = 0;
+let results = '';
+let userChoice = '';
+
+function loadQuestions() {
+  let html = '';
+  questions.forEach((q, index) => {
+    html += `
+      <div class="question-block">
+        <h2>${q}</h2>
+        <p>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="1"> 1 - 非常不同意</label>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="2"> 2</label>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="3"> 3</label>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="4"> 4</label>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="5"> 5</label>
+          <label class="scale-option"><input type="radio" name="answer${index}" value="6"> 6 - 非常同意</label>
+        </p>
+      </div>`;
+  });
+  document.getElementById('questionContainer').innerHTML = html;
+}
+
+document.getElementById('startButton').addEventListener('click', () => {
+  document.getElementById('startButton').style.display = 'none';
+  document.getElementById('choiceQuestion').style.display = 'block';
+});
+
+function selectChoice(choice) {
+  userChoice = choice;
+  results += `選擇：${userChoice}\n\n`;
+
+  document.getElementById('choiceQuestion').style.display = 'none';
+  document.getElementById('surveyImage').style.display = 'block';
+  document.getElementById('surveyForm').style.display = 'block';
+
+  // 啟動問卷
+  document.getElementById('surveyImage').src = images[currentIndex];
+  loadQuestions();
+
+  hideQuestionsAndButton();
+  showQuestionsAndButton();
+}
+
+document.getElementById('surveyForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  let allAnswered = true;
+  let textContent = `圖片：${document.getElementById('surveyImage').src}\n`;
+
+  questions.forEach((question, index) => {
+    const answer = document.querySelector(`input[name='answer${index}']:checked`);
+    if (!answer) {
+      allAnswered = false;
+    } else {
+      textContent += `題目：${question}\n回答：${answer.value}\n\n`;
+    }
+  });
+
+  if (!allAnswered) {
+    alert('請對每個題目都選擇一個答案！');
+    return;
+  }
+
+  // 顯示全螢幕灰畫面
+  document.getElementById('grayOverlay').style.display = 'block';
+
+  setTimeout(() => {
+    document.getElementById('grayOverlay').style.display = 'none';
+
+    currentIndex++;
+    if (currentIndex < images.length) {
+      document.getElementById('surveyImage').src = images[currentIndex];
+      loadQuestions();
+
+      hideQuestionsAndButton();
+      showQuestionsAndButton();
+
+    } else {
+      const blob = new Blob([results], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '問卷結果.txt';
+      a.click();
+
+      URL.revokeObjectURL(url);
+
+      alert('已完成問卷！');
+      location.reload();
+    }
+
+  }, 10000);
+
+  results += textContent + '\n';
+});
+
+function hideQuestionsAndButton() {
+  document.getElementById('questionContainer').style.display = 'none';
+  document.querySelector('button[type="submit"]').style.display = 'none';
+}
+
+function showQuestionsAndButton() {
+  setTimeout(() => {
+    document.getElementById('questionContainer').style.display = 'block';
+    document.querySelector('button[type="submit"]').style.display = 'inline-block';
+  }, 5000);
+}
+
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.attributeName === 'style') {
+      const display = document.getElementById('grayOverlay').style.display;
+      if (display === 'none') {
+        hideQuestionsAndButton();
+        showQuestionsAndButton();
+      }
+    }
+  });
+});
+
+observer.observe(document.getElementById('grayOverlay'), { attributes: true });
+
+  </script>
+</body>
 </html>
